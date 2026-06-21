@@ -1,0 +1,393 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+.scene{
+  width:100%;min-height:680px;
+  background:#05010f;
+  position:relative;overflow:hidden;
+  font-family:'Georgia',serif;
+  display:flex;flex-direction:column;align-items:center;
+}
+canvas#bg{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0}
+
+.slider-wrap{
+  position:relative;z-index:10;
+  width:88%;max-width:340px;
+  margin:0 auto;
+  padding:22px 0 8px;
+}
+.slider-hint{
+  text-align:center;font-size:13px;
+  color:rgba(255,220,140,0.55);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:14px;
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+
+.track-outer{
+  width:100%;height:54px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,200,80,0.25);
+  border-radius:27px;
+  position:relative;
+  overflow:hidden;
+}
+.track-fill{
+  height:100%;border-radius:27px;
+  background:linear-gradient(90deg,#b34700,#ff8c00,#ffd000);
+  width:0%;transition:width .05s linear;
+  position:absolute;top:0;left:0;
+}
+.thumb{
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,#ff8800,#ff4400);
+  border:2px solid #ffcc55;
+  position:absolute;top:0;left:0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:grab;user-select:none;touch-action:none;
+  transition:box-shadow .2s;
+  z-index:2;
+  box-shadow:0 0 18px rgba(255,140,0,.6);
+  font-size:22px;
+}
+.thumb:active{cursor:grabbing;box-shadow:0 0 30px rgba(255,180,0,.9)}
+.arrow-icon{color:#fff;font-size:20px;pointer-events:none;margin-left:4px}
+
+.card-area{
+  position:relative;z-index:10;
+  width:90%;max-width:340px;
+  margin:16px auto 20px;
+  opacity:0;
+  transform:scale(0.88) translateY(20px);
+  transition:opacity .5s ease, transform .5s ease;
+  pointer-events:none;
+}
+.card-area.visible{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}
+
+.card{
+  border-radius:22px;
+  border:1.5px solid rgba(255,200,80,0.3);
+  overflow:hidden;
+  background:linear-gradient(160deg,#0d0820 0%,#1a0c00 55%,#0a1a08 100%);
+  padding-bottom:20px;
+}
+.card-top{
+  padding:28px 20px 18px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,180,50,0.12);
+}
+.eyebrow{
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:#ff9030;font-family:'Georgia',serif;
+  margin-bottom:10px;
+}
+.main-title{
+  font-size:30px;font-weight:700;
+  color:#ffe8b0;line-height:1.2;
+  text-shadow:0 0 30px rgba(255,160,0,.4);
+  margin-bottom:4px;
+}
+.sub-title{
+  font-size:14px;color:rgba(255,210,130,.6);
+  letter-spacing:.5px;
+}
+
+.illustrations{
+  display:flex;justify-content:center;align-items:flex-end;
+  gap:16px;padding:20px 16px 8px;
+}
+.ill-item{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ill-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:'Georgia',serif}
+
+.poem{
+  margin:6px 18px 0;
+  background:rgba(255,160,40,0.05);
+  border:1px solid rgba(255,180,50,0.15);
+  border-radius:14px;
+  padding:20px;
+  text-align:center;
+}
+.poem p{
+  font-size:15px;line-height:1.8;
+  color:#ddc080;font-family:'Georgia',serif;
+}
+.poem p b{color:#ffcc55}
+.poem .closing{
+  margin-top:14px;
+  font-size:18px;font-weight:700;
+  color:#ffe8b0;font-family:'Georgia',serif;
+}
+.heart{display:inline-block;animation:hb 1.4s ease-in-out infinite;color:#ff4444}
+@keyframes hb{0%,100%{transform:scale(1)}14%{transform:scale(1.3)}28%{transform:scale(1)}42%{transform:scale(1.18)}56%{transform:scale(1)}}
+
+.badges{display:flex;justify-content:center;gap:10px;padding:14px 16px 0;flex-wrap:wrap}
+.badge{
+  font-size:12px;padding:7px 14px;border-radius:100px;
+  font-family:'Georgia',serif;display:flex;align-items:center;gap:6px;
+}
+.bf{background:rgba(255,80,0,.14);border:1px solid rgba(255,80,0,.3);color:#ff9940}
+.bg{background:rgba(60,140,40,.14);border:1px solid rgba(60,140,40,.3);color:#80d050}
+</style>
+
+<div class="scene">
+<canvas id="bg"></canvas>
+
+<div class="slider-wrap">
+  <div class="slider-hint">Тягни вправо &rarr;</div>
+  <div class="track-outer" id="track">
+    <div class="track-fill" id="fill"></div>
+    <div class="thumb" id="thumb">
+      <span class="arrow-icon">&#10148;</span>
+    </div>
+  </div>
+</div>
+
+<div class="card-area" id="card">
+  <div class="card">
+    <div class="card-top">
+      <div class="eyebrow">З любов&apos;ю від серця</div>
+      <div class="main-title">З Днем Батька,<br>Тату!</div>
+      <div class="sub-title">Наш справжній герой</div>
+    </div>
+
+    <div class="illustrations">
+      <div class="ill-item">
+        <svg width="80" height="110" viewBox="0 0 80 110" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="17" rx="21" ry="11" fill="#cc2200"/>
+          <rect x="19" y="17" width="42" height="7" rx="3.5" fill="#aa1a00"/>
+          <circle cx="40" cy="32" r="12" fill="#f0c080"/>
+          <circle cx="35" cy="30" r="2" fill="#3a2000"/>
+          <circle cx="45" cy="30" r="2" fill="#3a2000"/>
+          <path d="M35 37 Q40 41 45 37" stroke="#3a2000" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <rect x="23" y="44" width="34" height="38" rx="5" fill="#1a2d4a"/>
+          <rect x="23" y="54" width="34" height="4" rx="2" fill="#f5c300" opacity=".9"/>
+          <rect x="23" y="68" width="34" height="4" rx="2" fill="#f5c300" opacity=".9"/>
+          <rect x="31" y="46" width="18" height="7" rx="2" fill="#c8a200"/>
+          <text x="40" y="51.5" text-anchor="middle" font-size="5" font-weight="700" fill="#1a1a00" font-family="Arial">ДСНС</text>
+          <rect x="8" y="44" width="11" height="26" rx="5" fill="#1a2d4a"/>
+          <rect x="61" y="44" width="11" height="26" rx="5" fill="#1a2d4a"/>
+          <ellipse cx="13" cy="72" rx="6" ry="4" fill="#2a1a00"/>
+          <ellipse cx="67" cy="72" rx="6" ry="4" fill="#2a1a00"/>
+          <path d="M67 70 Q76 66 78 56 Q79 48 75 43" stroke="#444" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <circle cx="75" cy="41" r="4" fill="#5ab0f5" opacity=".8"/>
+          <circle cx="71" cy="37" r="3" fill="#5ab0f5" opacity=".55"/>
+          <rect x="27" y="82" width="11" height="15" rx="3" fill="#111"/>
+          <rect x="42" y="82" width="11" height="15" rx="3" fill="#111"/>
+        </svg>
+        <span class="ill-label" style="color:#ff8040">Рятувальник</span>
+      </div>
+      <div style="color:rgba(255,200,80,.5);font-size:20px;padding-bottom:40px">&#10022;</div>
+      <div class="ill-item">
+        <svg width="100" height="110" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="22" y="42" width="56" height="34" rx="7" fill="#2e6e1a"/>
+          <rect x="56" y="30" width="30" height="24" rx="5" fill="#3a8a22"/>
+          <rect x="26" y="30" width="28" height="22" rx="4" fill="#a8d8f0" opacity=".85"/>
+          <rect x="78" y="34" width="5" height="3" rx="1" fill="#1a4010"/>
+          <rect x="78" y="40" width="5" height="3" rx="1" fill="#1a4010"/>
+          <rect x="78" y="46" width="5" height="3" rx="1" fill="#1a4010"/>
+          <rect x="74" y="18" width="5" height="16" rx="2" fill="#222"/>
+          <ellipse cx="77" cy="18" rx="4" ry="3" fill="#333"/>
+          <circle cx="77" cy="11" r="5" fill="#555" opacity=".5"/>
+          <circle cx="33" cy="83" r="22" fill="#1a1a1a"/>
+          <circle cx="33" cy="83" r="16" fill="#2a2a2a"/>
+          <circle cx="33" cy="83" r="5" fill="#555"/>
+          <line x1="33" y1="67" x2="33" y2="99" stroke="#555" stroke-width="2"/>
+          <line x1="17" y1="83" x2="49" y2="83" stroke="#555" stroke-width="2"/>
+          <circle cx="80" cy="83" r="12" fill="#1a1a1a"/>
+          <circle cx="80" cy="83" r="8" fill="#2a2a2a"/>
+          <circle cx="80" cy="83" r="3" fill="#555"/>
+          <rect x="38" y="26" width="15" height="5" rx="2" fill="#8B4513"/>
+          <circle cx="46" cy="20" r="7" fill="#f0c080"/>
+          <rect x="40" y="26" width="12" height="12" rx="3" fill="#2244aa"/>
+          <rect x="22" y="70" width="56" height="2.5" rx="1" fill="#0057b7" opacity=".9"/>
+          <rect x="22" y="72.5" width="56" height="2.5" rx="1" fill="#ffd700" opacity=".9"/>
+        </svg>
+        <span class="ill-label" style="color:#7ecb50">Тракторист</span>
+      </div>
+    </div>
+
+    <div class="poem">
+      <p>Ти рятуєш з <b>вогню</b> —<br>і наш дім у теплі.<br>
+      Ти <b>ореш землю</b> рано —<br>і стіл завжди повний.<br><br>
+      Два серця — одна сила.<br>Два шляхи — одна любов.</p>
+      <div class="closing">Дякую, що ти є! <span class="heart">&#10084;</span></div>
+    </div>
+
+    <div class="badges">
+      <div class="badge bf">&#128293; Пожежний ДСНС</div>
+      <div class="badge bg">&#128668; Тракторист</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let W, H, stars=[], particles=[];
+
+function resize(){
+  W=canvas.width=canvas.offsetWidth;
+  H=canvas.height=canvas.offsetHeight||680;
+}
+resize();
+
+function initStars(){
+  stars=[];
+  for(let i=0;i<160;i++){
+    stars.push({x:Math.random()*W,y:Math.random()*H*0.7,r:Math.random()*1.4+0.3,a:Math.random(),da:(Math.random()-.5)*0.012});
+  }
+}
+initStars();
+
+function drawBg(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#05010f');
+  g.addColorStop(0.55,'#0d0415');
+  g.addColorStop(0.75,'#1a0800');
+  g.addColorStop(1,'#0a1a05');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+
+function drawStars(){
+  stars.forEach(s=>{
+    s.a+=s.da;
+    if(s.a>1||s.a<0) s.da*=-1;
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,230,180,${s.a.toFixed(2)})`;
+    ctx.fill();
+  });
+}
+
+function drawMoon(){
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(W*0.82,50,28,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,240,180,0.18)';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(W*0.82,50,20,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,240,180,0.12)';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(W*0.82,50,12,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,245,200,0.9)';
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawHorizon(){
+  const gy=H*0.62;
+  const gf=ctx.createLinearGradient(0,gy-30,0,gy+60);
+  gf.addColorStop(0,'rgba(0,0,0,0)');
+  gf.addColorStop(0.4,'rgba(60,120,20,0.25)');
+  gf.addColorStop(1,'rgba(20,60,5,0.6)');
+  ctx.fillStyle=gf; ctx.fillRect(0,gy-30,W,90);
+
+  ctx.beginPath();
+  ctx.moveTo(0,gy);
+  let x=0;
+  while(x<W){
+    ctx.lineTo(x,gy+Math.sin(x*0.04)*4+Math.sin(x*0.09)*2);
+    x+=2;
+  }
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+  ctx.fillStyle='#0a1a05'; ctx.fill();
+}
+
+function drawFlames(){
+  const fx=[W*0.18,W*0.28,W*0.35];
+  const now=Date.now()/1000;
+  fx.forEach((x,i)=>{
+    const h=22+Math.sin(now*3+i)*6;
+    const g2=ctx.createRadialGradient(x,H*0.62,0,x,H*0.62-h,h);
+    g2.addColorStop(0,'rgba(255,200,0,0.9)');
+    g2.addColorStop(0.4,'rgba(255,80,0,0.7)');
+    g2.addColorStop(1,'rgba(255,0,0,0)');
+    ctx.beginPath();
+    ctx.ellipse(x,H*0.62-h/2,8+Math.sin(now*4+i)*2,h,0,0,Math.PI*2);
+    ctx.fillStyle=g2; ctx.fill();
+  });
+}
+
+function spawnParticle(){
+  if(Math.random()<0.3){
+    const x=W*(0.1+Math.random()*0.3);
+    particles.push({x,y:H*0.62,vx:(Math.random()-.5)*1.2,vy:-(1+Math.random()*2),life:1,r:1+Math.random()*2});
+  }
+}
+
+function drawParticles(){
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.life-=0.02; p.vy*=0.98;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,${Math.floor(160+p.life*80)},0,${p.life.toFixed(2)})`;
+    ctx.fill();
+  });
+}
+
+function drawTractor(){
+  const tx=W*0.72, ty=H*0.62;
+  ctx.save(); ctx.translate(tx,ty);
+  ctx.fillStyle='#2e6e1a';
+  ctx.beginPath(); ctx.roundRect(-30,-22,50,22,4); ctx.fill();
+  ctx.fillStyle='#3a8a22';
+  ctx.beginPath(); ctx.roundRect(10,-32,24,18,4); ctx.fill();
+  ctx.fillStyle='rgba(168,216,240,0.7)';
+  ctx.beginPath(); ctx.roundRect(-28,-30,22,16,3); ctx.fill();
+  ctx.fillStyle='#111';
+  ctx.beginPath(); ctx.arc(-16,4,14,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(22,2,9,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#444'; ctx.lineWidth=1.5;
+  [-16,22].forEach(cx=>{
+    ctx.beginPath(); ctx.arc(cx,cx===-16?4:2,cx===-16?8:5,0,Math.PI*2); ctx.stroke();
+  });
+  ctx.restore();
+}
+
+let animId;
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  drawBg(); drawStars(); drawMoon(); drawHorizon();
+  drawFlames(); spawnParticle(); drawParticles(); drawTractor();
+  animId=requestAnimationFrame(loop);
+}
+loop();
+window.addEventListener('resize',()=>{resize();initStars();});
+
+const thumb=document.getElementById('thumb');
+const fill=document.getElementById('fill');
+const track=document.getElementById('track');
+const card=document.getElementById('card');
+let dragging=false, startX=0, startLeft=0;
+const THUMB_W=54;
+
+function getTrackW(){return track.offsetWidth-THUMB_W;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v);}
+
+function setPos(px){
+  const max=getTrackW();
+  const p=clamp(px,0,max);
+  thumb.style.left=p+'px';
+  const pct=p/max;
+  fill.style.width=(p+THUMB_W/2)+'px';
+  if(pct>0.85){
+    card.classList.add('visible');
+    if(!card.classList.contains('done')){
+      card.classList.add('done');
+      thumb.style.left=max+'px';
+      fill.style.width='100%';
+    }
+  }
+}
+
+thumb.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX;startLeft=thumb.offsetLeft;e.preventDefault();});
+thumb.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX;startLeft=thumb.offsetLeft;e.preventDefault();},{passive:false});
+document.addEventListener('mousemove',e=>{if(!dragging)return; const dx=e.clientX-startX; setPos(startLeft+dx);});
+document.addEventListener('touchmove',e=>{if(!dragging)return; const dx=e.touches[0].clientX-startX; setPos(startLeft+dx);e.preventDefault();},{passive:false});
+document.addEventListener('mouseup',()=>{if(dragging&&!card.classList.contains('done')){setPos(0);fill.style.width='0%';}dragging=false;});
+document.addEventListener('touchend',()=>{if(dragging&&!card.classList.contains('done')){setPos(0);fill.style.width='0%';}dragging=false;});
+</script>
